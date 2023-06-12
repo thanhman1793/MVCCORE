@@ -1,0 +1,53 @@
+@using Microsoft.EntityFrameworkCore
+@using System.Data
+@using MVC.Model
+
+@inject AppDbContext dbcontext;
+@{
+    var connect = dbcontext.Database.GetDbConnection();
+    var dbName = connect.Database;
+    var can_connect = dbcontext.Database.CanConnect();
+}
+<partial name="_AlertMessage"> </partial>
+
+<h2>Thong tin</h2>
+<p>- Database: @dbName</p>
+<p>- Source: @connect.DataSource</p>
+<p>- State: @connect.State</p>
+<hr/>
+
+@if(can_connect){
+    <h2>Table list: </h2>
+    await dbcontext.Database.OpenConnectionAsync();
+    var tables = dbcontext.Database.GetDbConnection().GetSchema("Tables");
+    <ul>
+        @foreach (System.Data.DataRow item in tables.Rows)
+        {
+            <li> @item["TABLE_NAME"]</li>
+        }
+    </ul>
+}
+<h2>Migration</h2>
+@foreach (var item in dbcontext.Database.GetAppliedMigrations())
+{
+    <p>@item</p>
+}
+
+@foreach (var item in dbcontext.Database.GetPendingMigrations())
+{
+     <p>@item (pending)</p>
+}
+
+@if(dbcontext.Database.GetPendingMigrations().Any())
+{
+    <form method="post">
+        <button type="submit" asp-action="Migrate" class="btn btn-success">
+            Generate db or Update mirtation
+        </button>
+        <hr>
+    </form>
+}
+
+@if(can_connect){
+    <a class="btn btn-danger" asp-action="DeleteDb">Delete database: @dbName</a>
+}

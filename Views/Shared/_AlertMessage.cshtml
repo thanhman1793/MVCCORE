@@ -1,0 +1,9 @@
+@{
+    var message = TempData["StatusMessage"] as string;
+}
+
+@if(!string.IsNullOrEmpty(message)){
+    <div class="alert alert-warning alert-dismissible fade show">
+        @message
+    </div>
+}
